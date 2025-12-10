@@ -1,0 +1,35 @@
+server:
+  port: 8081
+
+spring:
+  profiles:
+    active: dev
+
+  application:
+    name: library-management
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library_db
+    username: library_user
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Temporarily disable Spring Security (we'll configure it in Phase 4)
+  security:
+    user:
+      name: admin
+      password: admin
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

@@ -1,0 +1,31 @@
+package com.library.library_management.entity.enums;
+
+public enum Genre {
+    FICTION,
+    NON_FICTION,
+    MYSTERY,
+    SCIENCE_FICTION,
+    FANTASY,
+    ROMANCE,
+    THRILLER,
+    BIOGRAPHY,
+    HISTORY,
+    SCIENCE,
+    SELF_HELP,
+    POETRY,
+    DRAMA,
+    HORROR,
+    ADVENTURE,
+    CHILDREN,
+    YOUNG_ADULT,
+    COMICS,
+    ART,
+    COOKING,
+    TRAVEL,
+    RELIGION,
+    PHILOSOPHY,
+    PSYCHOLOGY,
+    BUSINESS,
+    TECHNOLOGY,
+    OTHER
+}
