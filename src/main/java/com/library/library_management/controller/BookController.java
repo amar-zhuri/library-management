@@ -5,6 +5,7 @@ import com.library.library_management.dto.response.BookResponse;
 import com.library.library_management.dto.response.PagedResponse;
 import com.library.library_management.entity.enums.Genre;
 import com.library.library_management.entity.enums.ReadingStatus;
+import com.library.library_management.security.CustomUserDetails;
 import com.library.library_management.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
@@ -24,10 +28,6 @@ public class BookController {
 
     private final BookService bookService;
 
-    // TODO: In Phase 4, we'll get userId from the authenticated user (JWT)
-    // For now, we'll accept it as a request header for testing
-    private static final String USER_ID_HEADER = "X-User-Id";
-
     /**
      * Create a new book
      * POST /api/books
@@ -35,20 +35,20 @@ public class BookController {
     @PostMapping
     public ResponseEntity<BookResponse> createBook(
             @Valid @RequestBody BookRequest request,
-            @RequestHeader(USER_ID_HEADER) Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        log.info("POST /api/books - Creating book for user {}", userId);
-        BookResponse response = bookService.createBook(request, userId);
+        log.info("POST /api/books - Creating book for user {}", userDetails.getId());
+        BookResponse response = bookService.createBook(request, userDetails.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Get all books for the user with optional filtering
-     * GET /api/books?genre=FANTASY&status=READING&search=hobbit&page=0&size=10&sort=title,asc
+     * Get all books for the authenticated user with optional filtering
+     * GET /api/books?genre=FANTASY&status=READING&search=hobbit&page=0&size=10
      */
     @GetMapping
     public ResponseEntity<PagedResponse<BookResponse>> getBooks(
-            @RequestHeader(USER_ID_HEADER) Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) Genre genre,
             @RequestParam(required = false) ReadingStatus status,
             @RequestParam(required = false) String search,
@@ -57,7 +57,7 @@ public class BookController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        log.info("GET /api/books - Fetching books for user {}", userId);
+        log.info("GET /api/books - Fetching books for user {}", userDetails.getId());
 
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -66,7 +66,7 @@ public class BookController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         PagedResponse<BookResponse> response = bookService.getUserBooks(
-                userId, genre, status, search, pageable);
+                userDetails.getId(), genre, status, search, pageable);
 
         return ResponseEntity.ok(response);
     }
@@ -78,10 +78,10 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBook(
             @PathVariable Long id,
-            @RequestHeader(USER_ID_HEADER) Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        log.info("GET /api/books/{} - Fetching book for user {}", id, userId);
-        BookResponse response = bookService.getBookById(id, userId);
+        log.info("GET /api/books/{} - Fetching book for user {}", id, userDetails.getId());
+        BookResponse response = bookService.getBookById(id, userDetails.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -93,10 +93,10 @@ public class BookController {
     public ResponseEntity<BookResponse> updateBook(
             @PathVariable Long id,
             @Valid @RequestBody BookRequest request,
-            @RequestHeader(USER_ID_HEADER) Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        log.info("PUT /api/books/{} - Updating book for user {}", id, userId);
-        BookResponse response = bookService.updateBook(id, request, userId);
+        log.info("PUT /api/books/{} - Updating book for user {}", id, userDetails.getId());
+        BookResponse response = bookService.updateBook(id, request, userDetails.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -107,27 +107,28 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(
             @PathVariable Long id,
-            @RequestHeader(USER_ID_HEADER) Long userId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        log.info("DELETE /api/books/{} - Deleting book for user {}", id, userId);
-        bookService.deleteBook(id, userId);
+        log.info("DELETE /api/books/{} - Deleting book for user {}", id, userDetails.getId());
+        bookService.deleteBook(id, userDetails.getId());
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Get book statistics for the user
+     * Get book statistics for the authenticated user
      * GET /api/books/stats
      */
     @GetMapping("/stats")
-    public ResponseEntity<?> getBookStats(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<Map<String, Long>> getBookStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        log.info("GET /api/books/stats - Fetching stats for user {}", userId);
+        log.info("GET /api/books/stats - Fetching stats for user {}", userDetails.getId());
 
-        var stats = java.util.Map.of(
-                "total", bookService.getBookCount(userId),
-                "toRead", bookService.getBookCountByStatus(userId, ReadingStatus.TO_READ),
-                "reading", bookService.getBookCountByStatus(userId, ReadingStatus.READING),
-                "completed", bookService.getBookCountByStatus(userId, ReadingStatus.COMPLETED)
+        Map<String, Long> stats = Map.of(
+                "total", bookService.getBookCount(userDetails.getId()),
+                "toRead", bookService.getBookCountByStatus(userDetails.getId(), ReadingStatus.TO_READ),
+                "reading", bookService.getBookCountByStatus(userDetails.getId(), ReadingStatus.READING),
+                "completed", bookService.getBookCountByStatus(userDetails.getId(), ReadingStatus.COMPLETED)
         );
 
         return ResponseEntity.ok(stats);

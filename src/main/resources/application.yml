@@ -33,3 +33,6 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+jwt:
+  secret: myVeryLongAndSecureSecretKeyThatIsAtLeast256BitsLongForHS256Algorithm2024!
+  expiration: 86400000

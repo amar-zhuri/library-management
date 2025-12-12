@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -23,9 +24,15 @@ public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
+//         log.info("Cleaning up database for fresh test...");
+//     bookRepository.deleteAll(); // Delete books first (Foreign Key)
+//     userRepository.deleteAll(); // Then delete users
+    
+    log.info("Loading initial test data...");
         if (userRepository.count() > 0) {
             log.info("Database already has data, skipping initialization");
             return;
@@ -33,36 +40,36 @@ public class DataLoader implements CommandLineRunner {
 
         log.info("Loading initial test data...");
 
-        // Create admin user
+        // Create admin user (password: admin123)
         User admin = User.builder()
                 .email("admin@library.com")
-                .password("$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqEqJE8E8VIkqY7aYGOqFmVgKMqK6")
+                .password(passwordEncoder.encode("admin123"))
                 .name("Admin User")
                 .role(Role.ADMIN)
                 .build();
         admin = userRepository.save(admin);
-        log.info("Created admin user: {}", admin.getEmail());
+        log.info("Created admin user: {} (password: admin123)", admin.getEmail());
 
-        // Create regular users
+        // Create regular users (password: password123)
         User alice = User.builder()
                 .email("alice@example.com")
-                .password("$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqEqJE8E8VIkqY7aYGOqFmVgKMqK6")
+                .password(passwordEncoder.encode("password123"))
                 .name("Alice Johnson")
                 .role(Role.USER)
                 .build();
         alice = userRepository.save(alice);
-        log.info("Created user: {}", alice.getEmail());
+        log.info("Created user: {} (password: password123)", alice.getEmail());
 
         User bob = User.builder()
                 .email("bob@example.com")
-                .password("$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqEqJE8E8VIkqY7aYGOqFmVgKMqK6")
+                .password(passwordEncoder.encode("password123"))
                 .name("Bob Smith")
                 .role(Role.USER)
                 .build();
         bob = userRepository.save(bob);
-        log.info("Created user: {}", bob.getEmail());
+        log.info("Created user: {} (password: password123)", bob.getEmail());
 
-        // Create books for Alice (5 books - she's an avid reader)
+        // Create books for Alice (5 books)
         createBook(alice, "The Name of the Wind", "Patrick Rothfuss", Genre.FANTASY,
                 ReadingStatus.COMPLETED, new BigDecimal("15.99"), 662, 2007);
         createBook(alice, "Dune", "Frank Herbert", Genre.SCIENCE_FICTION,
@@ -94,6 +101,11 @@ public class DataLoader implements CommandLineRunner {
         log.info("Test data loaded successfully!");
         log.info("Users created: {}", userRepository.count());
         log.info("Books created: {}", bookRepository.count());
+        log.info("===========================================");
+        log.info("Test Credentials:");
+        log.info("  Admin: admin@library.com / admin123");
+        log.info("  Alice: alice@example.com / password123");
+        log.info("  Bob:   bob@example.com / password123");
         log.info("===========================================");
     }
 
