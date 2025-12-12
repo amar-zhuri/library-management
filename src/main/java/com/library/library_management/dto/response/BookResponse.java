@@ -1,23 +1,22 @@
 package com.library.library_management.dto.response;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import com.library.library_management.entity.Book;
-
 import com.library.library_management.entity.enums.Genre;
 import com.library.library_management.entity.enums.ReadingStatus;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookResponse {
+
     private Long id;
     private String title;
     private String author;
@@ -31,9 +30,23 @@ public class BookResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Static factory method to convert Entity to DTO
-    public static BookResponse fromEntity(Book book)
-    {
+    // Owner info (populated for admin views)
+    private OwnerInfo owner;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OwnerInfo {
+        private Long id;
+        private String name;
+        private String email;
+    }
+
+    /**
+     * Convert entity to response (without owner info - for user's own books)
+     */
+    public static BookResponse fromEntity(Book book) {
         return BookResponse.builder()
                 .id(book.getId())
                 .title(book.getTitle())
@@ -48,6 +61,22 @@ public class BookResponse {
                 .createdAt(book.getCreatedAt())
                 .updatedAt(book.getUpdatedAt())
                 .build();
+    }
 
+    /**
+     * Convert entity to response (with owner info - for admin views)
+     */
+    public static BookResponse fromEntityWithOwner(Book book) {
+        BookResponse response = fromEntity(book);
+
+        if (book.getUser() != null) {
+            response.setOwner(OwnerInfo.builder()
+                    .id(book.getUser().getId())
+                    .name(book.getUser().getName())
+                    .email(book.getUser().getEmail())
+                    .build());
+        }
+
+        return response;
     }
 }
