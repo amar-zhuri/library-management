@@ -50,6 +50,11 @@ public class SecurityConfig {
 
                 // Set authorization rules
                 .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/health").permitAll()
