@@ -36,3 +36,10 @@ logging:
 jwt:
   secret: myVeryLongAndSecureSecretKeyThatIsAtLeast256BitsLongForHS256Algorithm2024!
   expiration: 86400000
+
+# OpenAI Configuration
+openai:
+  api:
+    key: ${OPENAI_API_KEY:}
+    url: https://api.openai.com/v1/chat/completions
+  model: gpt-4.1-nano	

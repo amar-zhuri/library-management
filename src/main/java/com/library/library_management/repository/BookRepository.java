@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 @Repository
@@ -50,6 +51,9 @@ public interface BookRepository extends JpaRepository<Book, Long>{
     @Query("SELECT b.user.id, b.user.name, COUNT(b) as bookCount " +
            "FROM Book b GROUP BY b.user.id, b.user.name ORDER BY bookCount DESC")
     List<Object[]> countBooksPerUser();
+
+
+    
     
     // Most popular books by title (across all users)
     @Query("SELECT b.title, b.author, COUNT(b) as count " +
@@ -57,6 +61,15 @@ public interface BookRepository extends JpaRepository<Book, Long>{
     List<Object[]> findMostPopularBooks(Pageable pageable);
     
     // Most expensive books
+        //@Query("SELECT b FROM Book b WHERE b.price IS NOT NULL ORDER BY b.price DESC")
+       // List<Book> findMostExpensiveBooks(Pageable pageable);
+
+
+        @Query("SELECT b FROM Book b JOIN FETCH b.user WHERE b.price IS NOT NULL ORDER BY b.price DESC")
+        List<Book> findMostExpensiveBooks(Pageable pageable);
+
+
+
     List<Book> findTop5ByPriceIsNotNullOrderByPriceDesc();
     
     // Books by genre distribution
@@ -70,5 +83,64 @@ public interface BookRepository extends JpaRepository<Book, Long>{
      // Top authors (most books in the system)
     @Query("SELECT b.author, COUNT(b) as count FROM Book b GROUP BY b.author ORDER BY count DESC")
     List<Object[]> findTopAuthors(Pageable pageable);
+    
+     // ========== User-specific AI Query Methods ==========
+
+    // User's genre distribution
+    @Query("SELECT b.genre, COUNT(b) FROM Book b WHERE b.user.id = :userId GROUP BY b.genre ORDER BY COUNT(b) DESC")
+    List<Object[]> countBooksByGenreForUser(@Param("userId") Long userId);
+
+    // User's status distribution
+    @Query("SELECT b.status, COUNT(b) FROM Book b WHERE b.user.id = :userId GROUP BY b.status")
+    List<Object[]> countBooksByStatusForUser(@Param("userId") Long userId);
+
+    // User's total library value
+    @Query("SELECT COALESCE(SUM(b.price), 0) FROM Book b WHERE b.user.id = :userId")
+    BigDecimal calculateLibraryValueForUser(@Param("userId") Long userId);
+
+    // User's top authors
+    @Query("SELECT b.author, COUNT(b) as count FROM Book b WHERE b.user.id = :userId GROUP BY b.author ORDER BY count DESC")
+    List<Object[]> findTopAuthorsForUser(@Param("userId") Long userId, Pageable pageable);
+
+    // User's recent books
+    @Query("SELECT b FROM Book b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
+    List<Book> findRecentBooksForUser(@Param("userId") Long userId, Pageable pageable);
+
+
+    // User's books by status
+    List<Book> findByUserIdAndStatus(Long userId, ReadingStatus status);
+
+    // User's books by genre
+    List<Book> findByUserIdAndGenre(Long userId, Genre genre);
+
+    // Find books by author for a user
+    List<Book> findByUserIdAndAuthorContainingIgnoreCase(Long userId, String author);
+
+    // Count books by genre for user
+    long countByUserIdAndGenre(Long userId, Genre genre);
+
+    // Find other users who have similar books (for collaborative filtering)
+    @Query("SELECT DISTINCT b2.user.id FROM Book b1 " +
+            "JOIN Book b2 ON b1.title = b2.title AND b1.author = b2.author " +
+            "WHERE b1.user.id = :userId AND b2.user.id != :userId")
+    List<Long> findUsersWithSimilarBooks(@Param("userId") Long userId);
+
+    // Find books that similar users have but current user doesn't
+    @Query("SELECT b FROM Book b WHERE b.user.id IN :similarUserIds " +
+            "AND NOT EXISTS (SELECT 1 FROM Book ub WHERE ub.user.id = :userId " +
+            "AND ub.title = b.title AND ub.author = b.author)")
+    List<Book> findBooksFromSimilarUsers(@Param("userId") Long userId,
+                                          @Param("similarUserIds") List<Long> similarUserIds,
+                                          Pageable pageable);
+
+        // Find books by user's favorite genre that they don't have
+    @Query("SELECT b FROM Book b WHERE b.genre = :genre " +
+            "AND NOT EXISTS (SELECT 1 FROM Book ub WHERE ub.user.id = :userId " +
+            "AND ub.title = b.title AND ub.author = b.author) " +
+            "GROUP BY b.id ORDER BY COUNT(b) DESC")
+    List<Book> findPopularBooksInGenreNotOwnedByUser(@Param("userId") Long userId,
+                                                      @Param("genre") Genre genre,
+                                                      Pageable pageable);
+
 
 }
