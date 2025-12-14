@@ -7,6 +7,7 @@ import com.library.library_management.entity.enums.ReadingStatus;
 import com.library.library_management.entity.enums.Role;
 import com.library.library_management.repository.BookRepository;
 import com.library.library_management.repository.UserRepository;
+import com.library.library_management.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,15 +25,17 @@ public class DataLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
-//         log.info("Cleaning up database for fresh test...");
-//     bookRepository.deleteAll(); // Delete books first (Foreign Key)
-//     userRepository.deleteAll(); // Then delete users
-    
-    log.info("Loading initial test data...");
+        log.info("Cleaning up database for fresh test...");
+        verificationTokenRepository.deleteAll();
+        bookRepository.deleteAll(); // Delete books first (Foreign Key)
+        userRepository.deleteAll(); // Then delete users
+
+        log.info("Loading initial test data...");
         if (userRepository.count() > 0) {
             log.info("Database already has data, skipping initialization");
             return;
@@ -46,6 +49,7 @@ public class DataLoader implements CommandLineRunner {
                 .password(passwordEncoder.encode("admin123"))
                 .name("Admin User")
                 .role(Role.ADMIN)
+                .emailVerified(true)
                 .build();
         admin = userRepository.save(admin);
         log.info("Created admin user: {} (password: admin123)", admin.getEmail());
@@ -56,6 +60,7 @@ public class DataLoader implements CommandLineRunner {
                 .password(passwordEncoder.encode("password123"))
                 .name("Alice Johnson")
                 .role(Role.USER)
+                .emailVerified(true)
                 .build();
         alice = userRepository.save(alice);
         log.info("Created user: {} (password: password123)", alice.getEmail());
@@ -64,6 +69,7 @@ public class DataLoader implements CommandLineRunner {
                 .email("bob@example.com")
                 .password(passwordEncoder.encode("password123"))
                 .name("Bob Smith")
+                .emailVerified(true)
                 .role(Role.USER)
                 .build();
         bob = userRepository.save(bob);

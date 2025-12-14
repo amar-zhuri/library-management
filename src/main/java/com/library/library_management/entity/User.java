@@ -68,4 +68,7 @@ public class User {
         book.setUser(null);
     }
 
+    @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean emailVerified = false;
 }
