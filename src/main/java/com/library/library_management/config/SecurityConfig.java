@@ -58,7 +58,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/health").permitAll()
-
+                        .requestMatchers("/api/notifications/unsubscribe/**").permitAll()
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

@@ -44,6 +44,9 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private NotificationPreferences notificationPreferences;
+
     @PrePersist
     protected void onCreate(){
         createdAt = LocalDateTime.now();

@@ -10,6 +10,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
+import com.library.library_management.entity.Book;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -81,6 +86,30 @@ public class EmailService {
         log.info("Password changed email sent to: {}", to);
     }
 
+ @Async
+    public void sendNewsletter(String to, String name, String subject, String content, String unsubscribeToken) {
+        String htmlContent = buildNewsletterTemplate(name, subject, content, unsubscribeToken);
+        sendHtmlEmail(to, subject, htmlContent);
+        log.debug("Newsletter sent to: {}", to);
+    }
+
+
+    @Async
+    public void sendNewBookNotification(String to, String name, Book book, String addedByName, String unsubscribeToken) {
+        String subject = "New Book Added: " + book.getTitle() + " - " + appName;
+        String htmlContent = buildNewBookNotificationTemplate(name, book, addedByName, unsubscribeToken);
+        sendHtmlEmail(to, subject, htmlContent);
+        log.debug("New book notification sent to: {}", to);
+    }
+     @Async
+    public void sendWeeklyDigest(String to, String name, List<Book> newBooks, Map<String, Object> stats, String unsubscribeToken) {
+        String subject = "Your Weekly Library Digest - " + appName;
+        String htmlContent = buildWeeklyDigestTemplate(name, newBooks, stats, unsubscribeToken);
+        sendHtmlEmail(to, subject, htmlContent);
+        log.debug("Weekly digest sent to: {}", to);
+    }
+
+
     /**
      * Core method to send HTML email
      */
@@ -101,8 +130,7 @@ public class EmailService {
         }
     }
 
-    // ========== Email Templates ==========
-
+    // ========== Email Templates ============== = ====
     private String buildVerificationEmailTemplate(String name, String verificationLink) {
         return """
             <!DOCTYPE html>
@@ -266,5 +294,184 @@ public class EmailService {
             </body>
             </html>
             """.formatted(name, appName);
+    }
+     private String buildNewsletterTemplate(String name, String subject, String content, String unsubscribeToken) {
+        String unsubscribeLink = frontendUrl + "/unsubscribe?token=" + unsubscribeToken;
+        
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                    .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+                    .unsubscribe { color: #6b7280; font-size: 11px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>%s</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello %s,</p>
+                        <div>%s</div>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; 2024 %s. All rights reserved.</p>
+                        <p class="unsubscribe">
+                            <a href="%s">Unsubscribe from newsletter</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(appName, name, content, appName, unsubscribeLink);
+    }
+
+    private String buildNewBookNotificationTemplate(String name, Book book, String addedByName, String unsubscribeToken) {
+        String unsubscribeLink = frontendUrl + "/unsubscribe?token=" + unsubscribeToken + "&type=new-books";
+        String bookLink = frontendUrl + "/books/" + book.getId();
+        
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #059669; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                    .book-card { background: white; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    .book-title { font-size: 20px; font-weight: bold; color: #1f2937; margin-bottom: 5px; }
+                    .book-author { color: #6b7280; margin-bottom: 10px; }
+                    .book-meta { font-size: 14px; color: #6b7280; }
+                    .button { display: inline-block; background-color: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; margin-top: 15px; }
+                    .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+                    .unsubscribe { color: #6b7280; font-size: 11px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>📚 New Book Added!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello %s,</p>
+                        <p>A new book has been added to the library by %s:</p>
+                        <div class="book-card">
+                            <div class="book-title">%s</div>
+                            <div class="book-author">by %s</div>
+                            <div class="book-meta">
+                                Genre: %s | %s pages
+                                %s
+                            </div>
+                        </div>
+                        <p>Happy reading! 📖</p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; 2024 %s. All rights reserved.</p>
+                        <p class="unsubscribe">
+                            <a href="%s">Unsubscribe from new book notifications</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                name,
+                addedByName,
+                book.getTitle(),
+                book.getAuthor(),
+                book.getGenre(),
+                book.getPageCount() != null ? book.getPageCount() : "N/A",
+                book.getPrice() != null ? " | $" + book.getPrice() : "",
+                appName,
+                unsubscribeLink
+            );
+    }
+
+    private String buildWeeklyDigestTemplate(String name, List<Book> newBooks, Map<String, Object> stats, String unsubscribeToken) {
+        String unsubscribeLink = frontendUrl + "/unsubscribe?token=" + unsubscribeToken + "&type=weekly-digest";
+        
+        StringBuilder booksHtml = new StringBuilder();
+        if (newBooks != null && !newBooks.isEmpty()) {
+            for (Book book : newBooks) {
+                booksHtml.append(String.format("""
+                    <li><strong>%s</strong> by %s (%s)</li>
+                    """, book.getTitle(), book.getAuthor(), book.getGenre()));
+            }
+        } else {
+            booksHtml.append("<li>No new books this week</li>");
+        }
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #7C3AED; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                    .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+                    .stats-box { background: white; border-radius: 8px; padding: 15px; margin: 15px 0; }
+                    .stat { display: inline-block; text-align: center; padding: 10px 20px; }
+                    .stat-number { font-size: 24px; font-weight: bold; color: #7C3AED; }
+                    .stat-label { font-size: 12px; color: #6b7280; }
+                    .section-title { font-size: 16px; font-weight: bold; margin-top: 20px; color: #1f2937; }
+                    .footer { text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px; }
+                    .unsubscribe { color: #6b7280; font-size: 11px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>📊 Your Weekly Digest</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello %s,</p>
+                        <p>Here's your weekly library summary:</p>
+                        
+                        <div class="stats-box">
+                            <div class="stat">
+                                <div class="stat-number">%s</div>
+                                <div class="stat-label">Total Books</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">%s</div>
+                                <div class="stat-label">Completed</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">%s</div>
+                                <div class="stat-label">Reading</div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-title">📚 New Books This Week</div>
+                        <ul>%s</ul>
+                        
+                        <p>Keep up the great reading! 🎉</p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; 2024 %s. All rights reserved.</p>
+                        <p class="unsubscribe">
+                            <a href="%s">Unsubscribe from weekly digest</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                name,
+                stats.getOrDefault("totalBooks", 0),
+                stats.getOrDefault("completed", 0),
+                stats.getOrDefault("reading", 0),
+                booksHtml.toString(),
+                appName,
+                unsubscribeLink
+            );
     }
 }

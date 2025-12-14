@@ -18,6 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.library.library_management.dto.request.BookRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+
+
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -118,6 +124,18 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Add a new book to the system (triggers new book notifications)
+     * POST /api/admin/books
+     */
+    @PostMapping("/books")
+    public ResponseEntity<BookResponse> addBook(
+            @Valid @RequestBody BookRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("POST /api/admin/books - Admin adding book: {}", request.getTitle());
+        BookResponse response = adminService.addBookAsAdmin(request, userDetails.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
     // ==================== STATISTICS ====================
 
     /**

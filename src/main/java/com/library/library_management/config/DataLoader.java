@@ -6,6 +6,7 @@ import com.library.library_management.entity.enums.Genre;
 import com.library.library_management.entity.enums.ReadingStatus;
 import com.library.library_management.entity.enums.Role;
 import com.library.library_management.repository.BookRepository;
+import com.library.library_management.repository.NotificationPreferencesRepository;
 import com.library.library_management.repository.UserRepository;
 import com.library.library_management.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+import com.library.library_management.entity.NotificationPreferences;
+import com.library.library_management.repository.NotificationPreferencesRepository;
+import java.util.UUID;
+
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class DataLoader implements CommandLineRunner {
     private final BookRepository bookRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationPreferencesRepository notificationPreferencesRepository;
 
     @Override
     public void run(String... args) {
@@ -74,6 +80,14 @@ public class DataLoader implements CommandLineRunner {
                 .build();
         bob = userRepository.save(bob);
         log.info("Created user: {} (password: password123)", bob.getEmail());
+
+                // Create notification preferences for all users
+        createNotificationPreferences(admin);
+        createNotificationPreferences(alice);
+        createNotificationPreferences(bob);
+
+
+
 
         // Create books for Alice (5 books)
         createBook(alice, "The Name of the Wind", "Patrick Rothfuss", Genre.FANTASY,
@@ -129,5 +143,18 @@ public class DataLoader implements CommandLineRunner {
                 .user(user)
                 .build();
         bookRepository.save(book);
+    }
+    private void createNotificationPreferences(User user) {
+        NotificationPreferences prefs = NotificationPreferences.builder()
+                .user(user)
+                .newsletterEnabled(true)
+                .newBooksEnabled(true)
+                .weeklyDigestEnabled(false)
+                .readingRemindersEnabled(false)
+                .achievementNotificationsEnabled(true)
+                .unsubscribeToken(UUID.randomUUID().toString())
+                .build();
+        notificationPreferencesRepository.save(prefs);
+        log.debug("Created notification preferences for user: {}", user.getEmail());
     }
 }
