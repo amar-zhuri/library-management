@@ -6,16 +6,23 @@ import com.library.library_management.entity.enums.ReadingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-@Repository
-public interface BookRepository extends JpaRepository<Book, Long>{
 
+import com.library.library_management.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+@Repository
+public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book>{
+
+        
         // Find all books for a specific user
     List<Book> findByUserId(Long userId);
 
@@ -142,5 +149,95 @@ public interface BookRepository extends JpaRepository<Book, Long>{
                                                       @Param("genre") Genre genre,
                                                       Pageable pageable);
 
+
+
+
+
+
+
+
+///Search 
+
+ /**
+     * Search suggestions - get distinct authors matching query
+     */
+    @Query("SELECT DISTINCT b.author FROM Book b WHERE b.user.id = :userId " +
+           "AND LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY b.author")
+    List<String> findDistinctAuthorsByUserIdAndQuery(@Param("userId") Long userId,
+                                                      @Param("query") String query,
+                                                      Pageable pageable);
+
+    /**
+     * Search suggestions - get distinct titles matching query
+     */
+    @Query("SELECT DISTINCT b.title FROM Book b WHERE b.user.id = :userId " +
+           "AND LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) ORDER BY b.title")
+    List<String> findDistinctTitlesByUserIdAndQuery(@Param("userId") Long userId,
+                                                     @Param("query") String query,
+                                                     Pageable pageable);
+
+                                                     /**
+     * Get all distinct authors for a user
+     */
+    @Query("SELECT DISTINCT b.author FROM Book b WHERE b.user.id = :userId ORDER BY b.author")
+    List<String> findDistinctAuthorsByUserId(@Param("userId") Long userId);
+
+    /**
+     * Get all distinct genres used by a user
+     */
+    @Query("SELECT DISTINCT b.genre FROM Book b WHERE b.user.id = :userId ORDER BY b.genre")
+    List<Genre> findDistinctGenresByUserId(@Param("userId") Long userId);
+
+    /**
+     * Get price range for a user's books
+     */
+    @Query("SELECT MIN(b.price), MAX(b.price) FROM Book b WHERE b.user.id = :userId AND b.price IS NOT NULL")
+    List<Object[]> findPriceRangeByUserId(@Param("userId") Long userId);
+
+     /**
+     * Get year range for a user's books
+     */
+    @Query("SELECT MIN(b.publicationYear), MAX(b.publicationYear) FROM Book b " +
+           "WHERE b.user.id = :userId AND b.publicationYear IS NOT NULL")
+    List<Object[]> findYearRangeByUserId(@Param("userId") Long userId);
+
+    /**
+     * Count books by genre for faceted search
+     */
+    @Query("SELECT b.genre, COUNT(b) FROM Book b WHERE b.user.id = :userId " +
+           "AND (:query IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+           "GROUP BY b.genre ORDER BY COUNT(b) DESC")
+    List<Object[]> countByGenreWithQuery(@Param("userId") Long userId, @Param("query") String query);
+
+         /**
+     * Count books by status for faceted search
+     */
+    @Query("SELECT b.status, COUNT(b) FROM Book b WHERE b.user.id = :userId " +
+           "AND (:query IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+           "OR LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+           "GROUP BY b.status")
+    List<Object[]> countByStatusWithQuery(@Param("userId") Long userId, @Param("query") String query);
+
+ /**
+     * Admin: Search all books across all users
+     */
+    @Query("SELECT b FROM Book b WHERE " +
+           "LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(b.author) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(b.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(b.isbn) LIKE LOWER(CONCAT('%', :query, '%'))")
+    Page<Book> searchAllBooks(@Param("query") String query, Pageable pageable);
+
+    /**
+     * Admin: Get distinct authors across all books
+     */
+    @Query("SELECT DISTINCT b.author FROM Book b ORDER BY b.author")
+    List<String> findAllDistinctAuthors(Pageable pageable);
+/**
+     * Quick search: search by title OR author for a user
+     */
+    Page<Book> findByUserIdAndTitleContainingIgnoreCaseOrUserIdAndAuthorContainingIgnoreCase(
+            Long userId1, String title, Long userId2, String author, Pageable pageable);
 
 }

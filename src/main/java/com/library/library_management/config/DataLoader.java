@@ -9,6 +9,7 @@ import com.library.library_management.repository.BookRepository;
 import com.library.library_management.repository.NotificationPreferencesRepository;
 import com.library.library_management.repository.UserRepository;
 import com.library.library_management.repository.VerificationTokenRepository;
+import com.library.library_management.repository.NewsletterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 import com.library.library_management.entity.NotificationPreferences;
-import com.library.library_management.repository.NotificationPreferencesRepository;
 import java.util.UUID;
 
 @Component
@@ -31,13 +31,16 @@ public class DataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final VerificationTokenRepository verificationTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final NewsletterRepository newsletterRepository;
     private final NotificationPreferencesRepository notificationPreferencesRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
         log.info("Cleaning up database for fresh test...");
         verificationTokenRepository.deleteAll();
+        newsletterRepository.deleteAll();
+        notificationPreferencesRepository.deleteAll();
         bookRepository.deleteAll(); // Delete books first (Foreign Key)
         userRepository.deleteAll(); // Then delete users
 

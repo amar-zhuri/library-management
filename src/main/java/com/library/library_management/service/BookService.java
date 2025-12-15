@@ -18,6 +18,9 @@ import com.library.library_management.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+   import com.library.library_management.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public class BookService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+ 
+
 
     @Transactional
     public BookResponse createBook(BookRequest request, Long userId)
@@ -149,5 +154,18 @@ public class BookService {
      */
     public long getBookCountByStatus(Long userId, ReadingStatus status) {
         return bookRepository.countByUserIdAndStatus(userId, status);
+    }
+    /**
+     * Quick search books by title or author
+     */
+    public PagedResponse<BookResponse> quickSearch(String query, Long userId, Pageable pageable) {
+        log.info("Quick search for user {}: '{}'", userId, query);
+
+        Page<Book> bookPage = bookRepository
+                .findByUserIdAndTitleContainingIgnoreCaseOrUserIdAndAuthorContainingIgnoreCase(
+                        userId, query, userId, query, pageable);
+
+        Page<BookResponse> responsePage = bookPage.map(BookResponse::fromEntity);
+        return PagedResponse.fromPage(responsePage);
     }
 }

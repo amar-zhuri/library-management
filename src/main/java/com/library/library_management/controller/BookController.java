@@ -3,6 +3,7 @@ package com.library.library_management.controller;
 import com.library.library_management.dto.request.BookRequest;
 import com.library.library_management.dto.response.BookResponse;
 import com.library.library_management.dto.response.PagedResponse;
+import com.library.library_management.entity.Book;
 import com.library.library_management.entity.enums.Genre;
 import com.library.library_management.entity.enums.ReadingStatus;
 import com.library.library_management.security.CustomUserDetails;
@@ -10,6 +11,8 @@ import com.library.library_management.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.hibernate.query.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,7 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import java.util.Map;
 
 @RestController
@@ -133,4 +138,24 @@ public class BookController {
 
         return ResponseEntity.ok(stats);
     }
+
+    /**
+     * Quick search books (simple text search)
+     * GET /api/books/quick-search?q=tolkien
+     */
+    @GetMapping("/quick-search")
+    public ResponseEntity<PagedResponse<BookResponse>> quickSearch(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        log.info("GET /api/books/quick-search - q='{}' for user {}", q, userDetails.getId());
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        PagedResponse<BookResponse> response = bookService.quickSearch(q, userDetails.getId(), pageable);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
