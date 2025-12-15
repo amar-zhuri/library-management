@@ -33,7 +33,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: amarzhurix@gmail.com
-    password: hymk ysxr udqh olxq
+    password: 
     properties:
       mail:
         smtp:
@@ -56,7 +56,7 @@ jwt:
 # OpenAI Configuration
 openai:
   api:
-    key: ${OPENAI_API_KEY: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}
+    key: ${OPENAI_API_KEY:}
     url: https://api.openai.com/v1/chat/completions
   model: gpt-4.1-nano	
 
