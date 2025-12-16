@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.library.library_management.service.TokenBlacklistService;
+
 import java.io.IOException;
 
 @Component
@@ -24,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -34,6 +37,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // Extract JWT from request
             String jwt = extractJwtFromRequest(request);
+            if (jwt != null && tokenBlacklistService.isBlacklisted(jwt)) {
+            log.debug("Token is blacklisted (logged out)");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
             if (jwt != null && jwtService.validateToken(jwt)) {
                 // Extract user ID from token
