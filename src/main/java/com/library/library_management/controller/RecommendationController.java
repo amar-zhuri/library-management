@@ -3,6 +3,7 @@ package com.library.library_management.controller;
 import com.library.library_management.dto.response.RecommendationResponse;
 import com.library.library_management.dto.response.RecommendationResponse.RecommendedBook;
 import com.library.library_management.security.CustomUserDetails;
+import com.library.library_management.service.AIRecommendationService;
 import com.library.library_management.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.List;
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
+    private final AIRecommendationService aiRecommendationService;
 
     /**
      * Get all recommendations for the current user
@@ -31,6 +33,21 @@ public class RecommendationController {
         log.info("GET /api/recommendations for user {}", userDetails.getId());
 
         RecommendationResponse response = recommendationService.getRecommendations(userDetails.getId());
+        return ResponseEntity.ok(response);
+    }
+
+
+    /**
+     * Get AI-powered recommendations (AI Picks)
+     * GET /api/recommendations/ai
+     */
+    @GetMapping("/ai")
+    public ResponseEntity<RecommendationResponse> getAIRecommendations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        log.info("GET /api/recommendations/ai for user {}", userDetails.getId());
+
+        RecommendationResponse response = aiRecommendationService.getAIRecommendations(userDetails.getId());
         return ResponseEntity.ok(response);
     }
 
