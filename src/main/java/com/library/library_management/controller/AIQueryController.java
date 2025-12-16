@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import com.library.library_management.dto.response.UserInsightsResponse;
+import com.library.library_management.service.UserInsightsService;
+import com.library.library_management.service.AIUserInsightsService;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -25,6 +27,8 @@ public class AIQueryController {
 
     private final AIQueryService aiQueryService;
 
+    private final UserInsightsService userInsightsService;
+private final AIUserInsightsService aiUserInsightsService;
     /**
      * Process a natural language query
      * POST /api/ai/query
@@ -104,5 +108,40 @@ public class AIQueryController {
         quickStats.put("readingProgress", readingStats.getData());
 
         return ResponseEntity.ok(quickStats);
+    }
+
+
+
+
+
+    ///////////////////////////Insights
+    /// 
+    /// 
+/**
+     * Get user insights (rule-based, instant)
+     * GET /api/ai/my-insights
+     */
+    @GetMapping("/my-insights")
+    public ResponseEntity<UserInsightsResponse> getMyInsights(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        log.info("GET /api/ai/my-insights for user {}", userDetails.getId());
+
+        UserInsightsResponse response = userInsightsService.getInsights(userDetails.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get AI-powered user insights (smart, 1-2 sec)
+     * GET /api/ai/my-insights/ai
+     */
+    @GetMapping("/my-insights/ai")
+    public ResponseEntity<UserInsightsResponse> getMyAIInsights(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        log.info("GET /api/ai/my-insights/ai for user {}", userDetails.getId());
+
+        UserInsightsResponse response = aiUserInsightsService.getAIInsights(userDetails.getId());
+        return ResponseEntity.ok(response);
     }
 }
