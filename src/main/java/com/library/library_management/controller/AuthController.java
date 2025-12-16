@@ -9,6 +9,8 @@ import com.library.library_management.dto.response.AuthResponse;
 import com.library.library_management.dto.response.MessageResponse;
 import com.library.library_management.security.CustomUserDetails;
 import com.library.library_management.service.AuthService;
+import com.library.library_management.service.TokenBlacklistService;
+import com.library.library_management.security.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final JwtService jwtService;
 
     /**
      * Register a new user
@@ -107,5 +112,28 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok(MessageResponse.success(
                 "Password reset successfully. You can now login with your new password."));
+    }
+
+    /**
+     * Logout user (invalidate token)
+     * POST /api/auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponse> logout(@RequestHeader("Authorization") String authHeader) {
+        log.info("POST /api/auth/logout");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            try {
+                Instant expiryTime = jwtService.getExpiryTime(token);
+                tokenBlacklistService.blacklistToken(token, expiryTime);
+                log.info("User logged out successfully");
+            } catch (Exception e) {
+                log.debug("Could not blacklist token: {}", e.getMessage());
+            }
+        }
+
+        return ResponseEntity.ok(MessageResponse.success("Logged out successfully"));
     }
 }
