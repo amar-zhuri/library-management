@@ -492,4 +492,4 @@ All routes require `ROLE_ADMIN` under `/api/admin/newsletter`.
 ## 12. Pagination Format
 - **Standard Response:** `PagedResponse<T>` or paged fields in `BookSearchResponse` and admin search endpoints (`page`, `size`, `totalElements`, `totalPages`, `first`, `last`, `content` list).
 - **Default Page Size:** 10 (controller defaults).
-- **Query Params:** `page` (0-based index), `size`, plus optional `sortBy` and `sortDir` where supported.
+- **Query Params:** `page` (0-based index), `size`, plus optional `sortBy` and `sortDir` where supported.npm

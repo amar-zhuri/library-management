@@ -103,6 +103,16 @@ public class DataLoader implements CommandLineRunner {
                 ReadingStatus.TO_READ, new BigDecimal("11.99"), 328, 1949);
         createBook(alice, "Clean Code", "Robert C. Martin", Genre.TECHNOLOGY,
                 ReadingStatus.READING, new BigDecimal("35.99"), 464, 2008);
+        createBook(alice, "Project Hail Mary", "Andy Weir", Genre.SCIENCE_FICTION,
+                ReadingStatus.TO_READ, new BigDecimal("19.50"), 476, 2021);
+        createBook(alice, "Mistborn", "Brandon Sanderson", Genre.FANTASY,
+                ReadingStatus.READING, new BigDecimal("13.49"), 672, 2006);
+        createBook(alice, "Thinking, Fast and Slow", "Daniel Kahneman", Genre.PSYCHOLOGY,
+                ReadingStatus.TO_READ, new BigDecimal("17.99"), 512, 2011);
+        createBook(alice, "Educated", "Tara Westover", Genre.BIOGRAPHY,
+                ReadingStatus.COMPLETED, new BigDecimal("14.75"), 352, 2018);
+        createBook(alice, "The Midnight Library", "Matt Haig", Genre.FICTION,
+                ReadingStatus.ON_HOLD, new BigDecimal("12.99"), 304, 2020);
 
         // Create books for Bob (4 books)
         createBook(bob, "The Great Gatsby", "F. Scott Fitzgerald", Genre.FICTION,
@@ -119,6 +129,22 @@ public class DataLoader implements CommandLineRunner {
                 ReadingStatus.COMPLETED, new BigDecimal("49.99"), 352, 2019);
         createBook(admin, "Design Patterns", "Gang of Four", Genre.TECHNOLOGY,
                 ReadingStatus.READING, new BigDecimal("54.99"), 416, 1994);
+        createBook(admin, "Deep Work", "Cal Newport", Genre.BUSINESS,
+                ReadingStatus.TO_READ, new BigDecimal("21.99"), 304, 2016);
+        createBook(admin, "Zero to One", "Peter Thiel", Genre.BUSINESS,
+                ReadingStatus.COMPLETED, new BigDecimal("18.00"), 224, 2014);
+        createBook(admin, "Pride and Prejudice", "Jane Austen", Genre.ROMANCE,
+                ReadingStatus.COMPLETED, new BigDecimal("9.99"), 279, 1813);
+        createBook(admin, "The Martian", "Andy Weir", Genre.SCIENCE_FICTION,
+                ReadingStatus.READING, new BigDecimal("15.99"), 387, 2014);
+        createBook(admin, "Dune Messiah", "Frank Herbert", Genre.SCIENCE_FICTION,
+                ReadingStatus.TO_READ, new BigDecimal("13.50"), 331, 1969);
+        createBook(admin, "The Shining", "Stephen King", Genre.HORROR,
+                ReadingStatus.TO_READ, new BigDecimal("16.50"), 447, 1977);
+        createBook(admin, "Kitchen Confidential", "Anthony Bourdain", Genre.COOKING,
+                ReadingStatus.COMPLETED, new BigDecimal("14.00"), 312, 2000);
+        createBook(admin, "Shoe Dog", "Phil Knight", Genre.BUSINESS,
+                ReadingStatus.COMPLETED, new BigDecimal("16.99"), 400, 2016);
 
         log.info("===========================================");
         log.info("Test data loaded successfully!");

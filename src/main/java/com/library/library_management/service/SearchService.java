@@ -204,15 +204,16 @@ public class SearchService {
      */
     private Map<String, Long> buildFacets(Long userId, String query) {
         Map<String, Long> facets = new LinkedHashMap<>();
+        String safeQuery = query == null ? "" : query;
 
         // Genre facets
-        List<Object[]> genreCounts = bookRepository.countByGenreWithQuery(userId, query);
+        List<Object[]> genreCounts = bookRepository.countByGenreWithQuery(userId, safeQuery);
         for (Object[] row : genreCounts) {
             facets.put("genre:" + row[0].toString(), (Long) row[1]);
         }
 
         // Status facets
-        List<Object[]> statusCounts = bookRepository.countByStatusWithQuery(userId, query);
+        List<Object[]> statusCounts = bookRepository.countByStatusWithQuery(userId, safeQuery);
         for (Object[] row : statusCounts) {
             facets.put("status:" + row[0].toString(), (Long) row[1]);
         }

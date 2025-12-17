@@ -78,6 +78,7 @@ public class NewsletterService {
     /**
      * Get newsletter by ID
      */
+    @Transactional(readOnly = true)
     public NewsletterResponse getNewsletter(Long id) {
         Newsletter newsletter = newsletterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Newsletter", id));
@@ -87,6 +88,7 @@ public class NewsletterService {
     /**
      * Get all newsletters with pagination
      */
+    @Transactional(readOnly = true)
     public PagedResponse<NewsletterResponse> getAllNewsletters(Pageable pageable) {
         Page<Newsletter> page = newsletterRepository.findAllByOrderByCreatedAtDesc(pageable);
         Page<NewsletterResponse> responsePage = page.map(NewsletterResponse::fromEntity);

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import com.library.library_management.dto.response.UserInsightsResponse;
 import com.library.library_management.service.UserInsightsService;
 import com.library.library_management.service.AIUserInsightsService;
+import com.library.library_management.service.AIAdminInsightsService;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ public class AIQueryController {
 
     private final UserInsightsService userInsightsService;
 private final AIUserInsightsService aiUserInsightsService;
+private final AIAdminInsightsService aiAdminInsightsService;
     /**
      * Process a natural language query
      * POST /api/ai/query
@@ -81,6 +83,18 @@ private final AIUserInsightsService aiUserInsightsService;
         log.info("GET /api/ai/insights - Generating system insights");
 
         InsightResponse response = aiQueryService.generateInsights();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get AI-powered system insights (Admin only, LLM)
+     * GET /api/ai/insights/ai
+     */
+    @GetMapping("/insights/ai")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<InsightResponse> getAIInsights() {
+        log.info("GET /api/ai/insights/ai - Generating AI system insights");
+        InsightResponse response = aiAdminInsightsService.getSystemAIInsights();
         return ResponseEntity.ok(response);
     }
 

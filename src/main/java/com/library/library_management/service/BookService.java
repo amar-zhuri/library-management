@@ -10,9 +10,11 @@ import com.library.library_management.dto.response.BookResponse;
 import com.library.library_management.dto.response.PagedResponse;
 import com.library.library_management.entity.Book;
 import com.library.library_management.entity.User;
+import com.library.library_management.entity.enums.Role;
 import com.library.library_management.entity.enums.Genre;
 import com.library.library_management.entity.enums.ReadingStatus;
 import com.library.library_management.exception.ResourceNotFoundException;
+import com.library.library_management.exception.UnauthorizedException;
 import com.library.library_management.repository.BookRepository;
 import com.library.library_management.repository.UserRepository;
 
@@ -137,6 +139,10 @@ public class BookService {
 
         Book book = bookRepository.findByIdAndUserId(bookId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", bookId));
+
+        if (book.getUser().getRole() == Role.ADMIN) {
+            throw new UnauthorizedException("System library books cannot be deleted from user workspace. Use admin tools.");
+        }
 
         bookRepository.delete(book);
         log.info("Book {} deleted successfully", bookId);

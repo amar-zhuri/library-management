@@ -112,12 +112,15 @@ public class SearchController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
+            @RequestParam(required = false) String isbn,
             @RequestParam(required = false) Genre genre,
             @RequestParam(required = false) ReadingStatus status,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Integer minYear,
             @RequestParam(required = false) Integer maxYear,
+            @RequestParam(required = false) Integer minPages,
+            @RequestParam(required = false) Integer maxPages,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -129,12 +132,15 @@ public class SearchController {
                 .query(q)
                 .title(title)
                 .author(author)
+                .isbn(isbn)
                 .genre(genre)
                 .status(status)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .minYear(minYear)
                 .maxYear(maxYear)
+                .minPages(minPages)
+                .maxPages(maxPages)
                 .page(page)
                 .size(size)
                 .sortBy(sortBy)
