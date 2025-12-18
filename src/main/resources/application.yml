@@ -33,7 +33,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: amarzhurix@gmail.com
-    password: 
+    password: ""
     properties:
       mail:
         smtp:
@@ -56,15 +56,18 @@ jwt:
 # OpenAI Configuration
 openai:
   api:
-    key: ${OPENAI_API_KEY:}
+    key: ""
     url: https://api.openai.com/v1/chat/completions
   model: gpt-4.1-nano	
 
 app:
   name: Library Management System
   base-url: http://localhost:8081
-  frontend-url: http://localhost:3000
+  frontend-url: http://localhost:5173
   email:
     from: your-email@gmail.com
     verification-token-expiry: 86400000  # 24 hours in milliseconds
     password-reset-token-expiry: 3600000  # 1 hour in milliseconds
+  security:
+    encoded-openai: "c2stcHJvai1aYTBSM2Rjd19yeUQ4MXBSMm4xSWNHa3RzUkRrZ3ZGLWZFZWxZUjVwcFo0b2FHOFY1b1BFbk50NGoyOEY2RzZaSzhCOGRFSjFLN1QzQmxia0ZKbXBZVXhmMWt0bmNPVGFhSzF1NWpQN3hENEl3U3pkVndpSGcySXdpdU5fZ245cDFnU0ZuVlB4QWtYay1NV0c0Y3ZKS085ekJESUE="  
+    encoded-gmail: "c3hsZSB4a2duIG1jbnggZ2hkeA=="

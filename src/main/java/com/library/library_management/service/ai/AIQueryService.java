@@ -91,7 +91,8 @@ public class AIQueryService {
                 answer = formatExpensiveBooksAnswer((List<BookResponse>) data);
             }
             case TOP_AUTHORS -> {
-                data = getTopAuthors(limit);
+                boolean personal = intent.getOriginalQuestion() != null && intent.getOriginalQuestion().toLowerCase().contains("my");
+                data = personal ? getTopAuthorsForUser(userId, limit) : getTopAuthors(limit);
                 answer = formatTopAuthorsAnswer((List<Map<String, Object>>) data);
             }
             case GENRE_DISTRIBUTION -> {
@@ -224,6 +225,17 @@ public class AIQueryService {
 
     private List<Map<String, Object>> getTopAuthors(int limit) {
         return bookRepository.findTopAuthors(PageRequest.of(0, limit)).stream()
+                .map(row -> {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("author", row[0]);
+                    map.put("bookCount", row[1]);
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<Map<String, Object>> getTopAuthorsForUser(Long userId, int limit) {
+        return bookRepository.findTopAuthorsForUser(userId, PageRequest.of(0, limit)).stream()
                 .map(row -> {
                     Map<String, Object> map = new LinkedHashMap<>();
                     map.put("author", row[0]);
