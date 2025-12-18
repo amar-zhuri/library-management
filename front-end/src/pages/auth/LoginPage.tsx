@@ -16,6 +16,7 @@ export const LoginPage = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>()
 
@@ -51,6 +52,35 @@ export const LoginPage = () => {
             Login
           </Button>
         </form>
+        <div className="mt-4 space-y-2 rounded-lg border border-primary-100 bg-primary-50 px-3 py-2 text-sm text-primary-900">
+          <p className="font-semibold">Test Accounts</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              className="rounded-md bg-white px-3 py-2 text-left shadow-sm ring-1 ring-primary-100 hover:bg-primary-100"
+              onClick={() => {
+                setValue('email', 'admin@library.com')
+                setValue('password', 'admin123')
+              }}
+            >
+              <div className="text-xs uppercase text-primary-700">Admin</div>
+              <div className="font-semibold">admin@library.com</div>
+              <div className="text-xs text-primary-700">admin123</div>
+            </button>
+            <button
+              type="button"
+              className="rounded-md bg-white px-3 py-2 text-left shadow-sm ring-1 ring-primary-100 hover:bg-primary-100"
+              onClick={() => {
+                setValue('email', 'alice@example.com')
+                setValue('password', 'password123')
+              }}
+            >
+              <div className="text-xs uppercase text-primary-700">User</div>
+              <div className="font-semibold">alice@example.com</div>
+              <div className="text-xs text-primary-700">password123</div>
+            </button>
+          </div>
+        </div>
         <div className="mt-4 flex items-center justify-between text-sm text-muted-600">
           <Link className="text-primary-600 hover:text-primary-700" to="/forgot-password">
             Forgot password?
