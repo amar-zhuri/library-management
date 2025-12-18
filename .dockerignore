@@ -1,0 +1,10 @@
+.git
+.idea
+.vscode
+target
+front-end
+library-management-frontend
+build-your-vision
+.env
+**/node_modules
+**/dist

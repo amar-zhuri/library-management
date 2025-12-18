@@ -11,6 +11,7 @@ import { insightsService } from '../../services/insightsService'
 import { aiService } from '../../services/aiService'
 import { useAuth } from '../../hooks/useAuth'
 import { libraryService } from '../../services/libraryService'
+import { Spinner } from '../../components/common/Spinner'
 
 const StatCard = ({ label, value }: { label: string; value: number | string }) => (
   <Card className="flex flex-col gap-1 bg-gradient-to-br from-white to-indigo-50">
@@ -158,10 +159,14 @@ export const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="h-32 animate-pulse bg-muted-100" />
-        <Card className="h-32 animate-pulse bg-muted-100" />
-        <Card className="h-32 animate-pulse bg-muted-100" />
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Card className="flex w-full max-w-2xl flex-col items-center gap-4 bg-gradient-to-br from-primary-50 to-indigo-50 py-10 text-center shadow-lg">
+          <Spinner className="h-12 w-12 border-3" />
+          <div>
+            <p className="text-lg font-semibold text-primary-800">Fetching your dashboard</p>
+            <p className="text-sm text-muted-600">Pulling AI insights, stats, and recommendations…</p>
+          </div>
+        </Card>
       </div>
     )
   }

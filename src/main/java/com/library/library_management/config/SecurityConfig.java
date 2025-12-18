@@ -34,7 +34,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
-    private final RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -69,7 +68,8 @@ public class SecurityConfig {
 
                 // Add authentication provider
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                // Temporarily disable rate limiter
+                //.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Add JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -80,11 +80,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // Allow common localhost variants; use patterns to avoid 403s from slight origin mismatches
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "http://127.0.0.1:8080",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:3000"
         ));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
