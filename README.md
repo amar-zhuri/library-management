@@ -1,6 +1,6 @@
 # Library Management System
 
-Full-stack library manager with JWT authentication, role-based admin tools, AI-assisted insights, rich search, and email notifications. The backend is Spring Boot 4 + PostgreSQL; the frontend is React + TypeScript + Vite with Tailwind styling.
+Full-stack library manager for both personal and shared collections: users catalog books, track reading progress, search/filter deeply, and get rule-based or AI-assisted recommendations; admins curate a global library, manage users, and run newsletters. Security is JWT-based with email verification, password reset, and logout token blacklisting. Search includes quick search, suggestions, and advanced filters; recommendations can call OpenAI when configured. Notification flows cover verification, reset, preferences, and newsletters. Backend is Spring Boot 4 + PostgreSQL; frontend is React + TypeScript + Vite with Tailwind.
 
 ## Features
 - **Authentication & Security:** JWT auth with refresh-less sessions, role-based access (`USER`, `ADMIN`), email verification, password reset, logout with token blacklist, CORS configured for common local hosts.
